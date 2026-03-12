@@ -1,6 +1,6 @@
 package mx.cua.uam.labtem.gestioneventos.service;
 
-import mx.cua.uam.labtem.gestioneventos.model.Instructor;
+import mx.cua.uam.labtem.gestioneventos.entity.Instructor;
 import mx.cua.uam.labtem.gestioneventos.repository.InstructorRepository;
 import org.springframework.stereotype.Service;
 

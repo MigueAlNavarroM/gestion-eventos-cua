@@ -1,6 +1,6 @@
 package mx.cua.uam.labtem.gestioneventos.controller;
 
-import mx.cua.uam.labtem.gestioneventos.model.Instructor;
+import mx.cua.uam.labtem.gestioneventos.entity.Instructor;
 import mx.cua.uam.labtem.gestioneventos.service.InstructorService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
