@@ -1,5 +1,7 @@
 package mx.cua.uam.labtem.gestioneventos.dto;
 
+import java.util.List;
+
 public record InstructorDTO(
         Integer idInstructor,
         String nombre,
@@ -9,5 +11,6 @@ public record InstructorDTO(
         String telefono,
         String especialidad,
         String bio,
-        Boolean activo
+        Boolean activo,
+        List<String> nombresCategorias
 ) {}

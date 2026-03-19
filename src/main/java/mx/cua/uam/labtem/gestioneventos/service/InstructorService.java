@@ -7,6 +7,7 @@ import mx.cua.uam.labtem.gestioneventos.repository.InstructorRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -17,15 +18,10 @@ public class InstructorService {
     @Autowired
     private InstructorRepository repo;
 
-    /**
-     * Obtener la lista de eventos vinculados a un instructor específico.
-     * Corregido para coincidir con los 8 parámetros del EventoDTO.
-     */
     public List<EventoDTO> listarEventosPorInstructor(Integer id) {
         InstructorEntity ins = repo.findById(id).orElse(null);
-        if (ins == null) return null;
+        if (ins == null || ins.getEventos() == null) return new ArrayList<>();
 
-        // Preparamos el nombre completo del instructor para el DTO
         String nombreCompleto = ins.getNombre() + " " + ins.getApellidoPaterno();
 
         return ins.getEventos().stream()
@@ -37,12 +33,23 @@ public class InstructorService {
                         e.getHora(),
                         e.getLugar(),
                         e.getCategoria() != null ? e.getCategoria().getNombre() : "Sin Categoría",
-                        nombreCompleto // <--- Dato 8: nombreInstructor
+                        nombreCompleto
                 ))
                 .collect(Collectors.toList());
     }
 
     private InstructorDTO convertirADTO(InstructorEntity i) {
+        List<String> categorias = new ArrayList<>();
+
+        // Validación de seguridad por si el instructor no tiene eventos creados
+        if (i.getEventos() != null) {
+            categorias = i.getEventos().stream()
+                    .filter(e -> e.getCategoria() != null)
+                    .map(e -> e.getCategoria().getNombre())
+                    .distinct()
+                    .collect(Collectors.toList());
+        }
+
         return new InstructorDTO(
                 i.getIdInstructor(),
                 i.getNombre(),
@@ -52,7 +59,8 @@ public class InstructorService {
                 i.getTelefono(),
                 i.getEspecialidad(),
                 i.getBio(),
-                i.getActivo()
+                i.getActivo(),
+                categorias
         );
     }
 

@@ -2,176 +2,118 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestión de instructores</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
-    <link rel="stylesheet" href="./css/main_instructor.css">
+    <title>UAM - Gestión de Instructores</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f8f9fa; }
+        .navbar { background-color: #1a1d20 !important; }
+        .card { border: none; border-radius: 10px; }
+        .btn-warning { background-color: #ffc107; border: none; }
+    </style>
 </head>
 <body>
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
+
+<nav class="navbar navbar-expand-lg navbar-dark shadow-sm mb-4">
     <div class="container-fluid">
-        <a class="navbar-brand fw-semibold" href="#">Sistema de Gestión de Eventos</a>
+        <a class="navbar-brand fw-bold" href="#">UAM - Gestión de Eventos Culturales</a>
+        <div class="collapse navbar-collapse">
+            <ul class="navbar-nav">
+                <li class="nav-item"><a class="nav-link" href="index_categoria.html">Categorías</a></li>
+                <li class="nav-item"><a class="nav-link active fw-bold" href="index_instructor.html">Instructores</a></li>
+            </ul>
+        </div>
     </div>
 </nav>
 
-<main class="container py-4">
-    <section class="card shadow-sm border-0 mb-4">
-        <div class="card-body p-4">
-            <div class="text-center mb-4">
-                <h1 class="h3 mb-2">Interfaz de instructores</h1>
-                <p class="text-muted mb-0">Busca por ID o nombre, consulta a todos los instructores y registra nuevos instructores.</p>
+<div class="container">
+    <div class="text-center card p-4 shadow-sm mb-4">
+        <h2 class="fw-bold">Interfaz de instructores</h2>
+        <p class="text-muted">Busca por ID o nombre, consulta a todos los instructores y registra nuevos instructores.</p>
+
+        <div class="row g-2 justify-content-center align-items-center">
+            <div class="col-md-5">
+                <label class="form-label d-block text-start small fw-bold">Indica el ID o nombre del instructor</label>
+                <input id="instructorInput" type="text" class="form-control text-center" placeholder="Ej. 1 o Laura">
             </div>
-
-            <form id="searchForm" class="row g-3 align-items-end">
-                <div class="col-12 col-lg-6">
-                    <label for="instructorSearch" class="form-label fw-semibold">Indica el ID o nombre del instructor</label>
-                    <input id="instructorSearch" type="text" class="form-control text-center" placeholder="Ej. 1 o Laura">
-                </div>
-                <div class="col-12 col-sm-4 col-lg-2 d-grid">
-                    <button type="submit" class="btn btn-warning fw-semibold">Buscar</button>
-                </div>
-                <div class="col-12 col-sm-4 col-lg-2 d-grid">
-                    <button type="button" id="btnTodos" class="btn btn-outline-primary fw-semibold">Todos los instructores</button>
-                </div>
-                <div class="col-12 col-sm-4 col-lg-2 d-grid">
-                    <button type="button" id="btnMostrarFormulario" class="btn btn-outline-success fw-semibold">Inscribir instructor</button>
-                </div>
-            </form>
-
-            <div id="feedback" class="alert d-none mt-4 mb-0" role="alert"></div>
-        </div>
-    </section>
-
-    <section id="detalleCard" class="card shadow-sm border-0 mb-4 d-none">
-        <div class="card-body p-4">
-            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
-                <h2 class="h4 mb-0">Detalle del instructor</h2>
-                <span class="badge text-bg-secondary" id="badgeActivo"></span>
-            </div>
-
-            <div class="table-responsive">
-                <table class="table table-striped table-bordered align-middle mb-0">
-                    <tbody>
-                    <tr>
-                        <th scope="row">ID</th>
-                        <td id="detalleId"></td>
-                    </tr>
-                    <tr>
-                        <th scope="row">Nombre completo</th>
-                        <td id="detalleNombre"></td>
-                    </tr>
-                    <tr>
-                        <th scope="row">Correo</th>
-                        <td id="detalleCorreo"></td>
-                    </tr>
-                    <tr>
-                        <th scope="row">Teléfono</th>
-                        <td id="detalleTelefono"></td>
-                    </tr>
-                    <tr>
-                        <th scope="row">Especialidad</th>
-                        <td id="detalleEspecialidad"></td>
-                    </tr>
-                    <tr>
-                        <th scope="row">Biografía</th>
-                        <td id="detalleBio"></td>
-                    </tr>
-                    <tr>
-                        <th scope="row">Categorías</th>
-                        <td id="detalleCategorias"></td>
-                    </tr>
-                    </tbody>
-                </table>
+            <div class="col-md-auto mt-4">
+                <button class="btn btn-warning fw-bold px-4" onclick="buscarInstructor()">Buscar</button>
+                <button class="btn btn-outline-primary fw-bold" onclick="listarTodos()">Todos los instructores</button>
+                <button class="btn btn-outline-success fw-bold" onclick="mostrarFormularioInstructor()">Inscribir instructor</button>
             </div>
         </div>
-    </section>
+    </div>
 
-    <section id="tablaCard" class="card shadow-sm border-0 mb-4 d-none">
-        <div class="card-body p-4">
-            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
-                <h2 class="h4 mb-0">Listado de instructores</h2>
-                <span class="text-muted small" id="totalResultados"></span>
-            </div>
-
-            <div class="table-responsive">
-                <table class="table table-hover table-bordered align-middle mb-0">
-                    <thead class="table-dark">
-                    <tr>
-                        <th>ID</th>
-                        <th>Nombre</th>
-                        <th>Correo</th>
-                        <th>Teléfono</th>
-                        <th>Especialidad</th>
-                        <th>Activo</th>
-                        <th>Categorías</th>
-                    </tr>
-                    </thead>
-                    <tbody id="tablaInstructoresBody"></tbody>
-                </table>
-            </div>
+    <div id="seccionTablaInstructores" class="card p-4 shadow d-none">
+        <h4 class="mb-3 fw-bold">Listado de instructores</h4>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-dark">
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Correo</th>
+                    <th>Teléfono</th>
+                    <th>Especialidad</th>
+                    <th class="text-center">Activo</th>
+                    <th>Categorías</th>
+                </tr>
+                </thead>
+                <tbody id="tablaBodyInstructores"></tbody>
+            </table>
         </div>
-    </section>
+    </div>
 
-    <section id="formCard" class="card shadow-sm border-0 d-none">
-        <div class="card-body p-4">
-            <h2 class="h4 mb-3">Registrar instructor</h2>
+    <div id="seccionFormularioInstructor" class="card p-4 shadow d-none">
+        <h4 class="mb-3 fw-bold">Registrar instructor</h4>
+        <form id="formInstructor" class="row g-3">
+            <div class="col-md-4">
+                <label class="form-label">Nombre</label>
+                <input type="text" id="insNombre" class="form-control" required>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Apellido paterno</label>
+                <input type="text" id="insPaterno" class="form-control" required>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Apellido materno</label>
+                <input type="text" id="insMaterno" class="form-control">
+            </div>
+            <div class="col-md-8">
+                <label class="form-label">Correo</label>
+                <input type="email" id="insCorreo" class="form-control" required>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Teléfono</label>
+                <input type="text" id="insTelefono" class="form-control">
+            </div>
+            <div class="col-md-8">
+                <label class="form-label">Especialidad</label>
+                <input type="text" id="insEspecialidad" class="form-control">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Activo</label>
+                <select id="insActivo" class="form-select">
+                    <option value="true">Sí</option>
+                    <option value="false">No</option>
+                </select>
+            </div>
+            <div class="col-12">
+                <label class="form-label">Biografía</label>
+                <textarea id="insBio" class="form-control" rows="3"></textarea>
+            </div>
+            <div class="col-12">
+                <label class="form-label">IDs de categorías</label>
+                <input type="text" id="insCategoriasIds" class="form-control" placeholder="Opcional. Ej. 1,2,3">
+                <small class="text-muted">Escribe IDs separados por coma si quieres asociar categorías al instructor.</small>
+            </div>
+            <div class="col-12">
+                <button type="submit" class="btn btn-success fw-bold px-4">Guardar instructor</button>
+                <button type="button" class="btn btn-outline-secondary" onclick="ocultarSecciones()">Cancelar</button>
+            </div>
+        </form>
+    </div>
+</div>
 
-            <form id="formInstructor" class="row g-3">
-                <div class="col-md-4">
-                    <label for="nombre" class="form-label">Nombre</label>
-                    <input type="text" id="nombre" class="form-control" required>
-                </div>
-                <div class="col-md-4">
-                    <label for="apellidoPaterno" class="form-label">Apellido paterno</label>
-                    <input type="text" id="apellidoPaterno" class="form-control">
-                </div>
-                <div class="col-md-4">
-                    <label for="apellidoMaterno" class="form-label">Apellido materno</label>
-                    <input type="text" id="apellidoMaterno" class="form-control">
-                </div>
-
-                <div class="col-md-6">
-                    <label for="correo" class="form-label">Correo</label>
-                    <input type="email" id="correo" class="form-control">
-                </div>
-                <div class="col-md-6">
-                    <label for="telefono" class="form-label">Teléfono</label>
-                    <input type="text" id="telefono" class="form-control">
-                </div>
-
-                <div class="col-md-6">
-                    <label for="especialidad" class="form-label">Especialidad</label>
-                    <input type="text" id="especialidad" class="form-control">
-                </div>
-                <div class="col-md-6">
-                    <label for="activo" class="form-label">Activo</label>
-                    <select id="activo" class="form-select">
-                        <option value="true" selected>Sí</option>
-                        <option value="false">No</option>
-                    </select>
-                </div>
-
-                <div class="col-12">
-                    <label for="bio" class="form-label">Biografía</label>
-                    <textarea id="bio" class="form-control" rows="3"></textarea>
-                </div>
-
-                <div class="col-12">
-                    <label for="categorias" class="form-label">IDs de categorías</label>
-                    <input type="text" id="categorias" class="form-control" placeholder="Opcional. Ej. 1,2,3">
-                    <div class="form-text">Escribe IDs separados por coma si quieres asociar categorías al instructor.</div>
-                </div>
-
-                <div class="col-12 d-flex gap-2 flex-wrap">
-                    <button type="submit" class="btn btn-success fw-semibold">Guardar instructor</button>
-                    <button type="button" id="btnCancelarFormulario" class="btn btn-outline-secondary">Cancelar</button>
-                </div>
-            </form>
-        </div>
-    </section>
-</main>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
-<script src="./js/main_instructor.js"></script>
+<script src="js/main_instructor.js"></script>
 </body>
 </html>

@@ -1,291 +1,109 @@
-const API_URL = "/instructores";
+// 1. FUNCIÓN DE BÚSQUEDA (Corregida para IDs)
+async function buscarInstructor() {
+    const busqueda = document.getElementById("instructorInput").value.trim();
+    if (!busqueda) return;
 
-const elements = {
-    searchForm: document.getElementById("searchForm"),
-    searchInput: document.getElementById("instructorSearch"),
-    btnTodos: document.getElementById("btnTodos"),
-    btnMostrarFormulario: document.getElementById("btnMostrarFormulario"),
-    btnCancelarFormulario: document.getElementById("btnCancelarFormulario"),
-    formInstructor: document.getElementById("formInstructor"),
-    feedback: document.getElementById("feedback"),
-    detalleCard: document.getElementById("detalleCard"),
-    tablaCard: document.getElementById("tablaCard"),
-    formCard: document.getElementById("formCard"),
-    tablaBody: document.getElementById("tablaInstructoresBody"),
-    totalResultados: document.getElementById("totalResultados"),
-    detalleId: document.getElementById("detalleId"),
-    detalleNombre: document.getElementById("detalleNombre"),
-    detalleCorreo: document.getElementById("detalleCorreo"),
-    detalleTelefono: document.getElementById("detalleTelefono"),
-    detalleEspecialidad: document.getElementById("detalleEspecialidad"),
-    detalleBio: document.getElementById("detalleBio"),
-    detalleCategorias: document.getElementById("detalleCategorias"),
-    badgeActivo: document.getElementById("badgeActivo")
+    ocultarSecciones();
+    try {
+        // Si es número, busca por ID directo
+        if (!isNaN(busqueda)) {
+            const resp = await fetch(`/instructores/${busqueda}`);
+            if (!resp.ok) throw new Error("No existe");
+            const ins = await resp.json();
+
+            // Reutilizamos la lógica de la tabla para mostrar solo uno
+            mostrarEnTabla([ins]);
+        } else {
+            // Aquí iría tu lógica de búsqueda por nombre si el backend la soporta
+            alert("Búsqueda por nombre en proceso...");
+        }
+    } catch (e) {
+        alert("El instructor con ID " + busqueda + " no existe.");
+    }
+}
+
+// 2. LISTAR TODOS
+async function listarTodos() {
+    ocultarSecciones();
+    try {
+        const resp = await fetch("/instructores");
+        const data = await resp.json();
+        mostrarEnTabla(data);
+    } catch (e) {
+        alert("Error al cargar la lista.");
+    }
+}
+
+// 3. FUNCIÓN PARA PINTAR LA TABLA (Vanessa ahora tendrá sus categorías)
+function mostrarEnTabla(lista) {
+    const body = document.getElementById("tablaBodyInstructores");
+    body.innerHTML = "";
+    document.getElementById("seccionTablaInstructores").classList.remove("d-none");
+
+    lista.forEach(ins => {
+        // Procesamos la lista de categorías que viene de Java
+        let catStr = (ins.nombresCategorias && ins.nombresCategorias.length > 0)
+            ? ins.nombresCategorias.join(", ")
+            : '<span class="text-muted">Sin categorías</span>';
+
+        body.innerHTML += `
+            <tr>
+                <td>${ins.idInstructor}</td>
+                <td class="fw-bold">${ins.nombre} ${ins.apellidoPaterno}</td>
+                <td>${ins.correo}</td>
+                <td>${ins.telefono}</td>
+                <td>${ins.especialidad}</td>
+                <td class="text-center">
+                    <span class="badge ${ins.activo ? 'bg-success' : 'bg-danger'}">
+                        ${ins.activo ? 'Sí' : 'No'}
+                    </span>
+                </td>
+                <td class="text-primary fw-bold">${catStr}</td>
+            </tr>`;
+    });
+}
+
+// 4. GUARDAR INSTRUCTOR
+document.getElementById("formInstructor").onsubmit = async (e) => {
+    e.preventDefault();
+    const payload = {
+        nombre: document.getElementById("insNombre").value,
+        apellidoPaterno: document.getElementById("insPaterno").value,
+        apellidoMaterno: document.getElementById("insMaterno").value,
+        correo: document.getElementById("insCorreo").value,
+        telefono: document.getElementById("insTelefono").value,
+        especialidad: document.getElementById("insEspecialidad").value,
+        bio: document.getElementById("insBio").value,
+        activo: document.getElementById("insActivo").value === "true"
+    };
+
+    const resp = await fetch("/instructores", {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(payload)
+    });
+
+    if (resp.ok) {
+        alert("¡Guardado!");
+        listarTodos();
+    }
 };
 
-function showFeedback(message, type = "info") {
-    elements.feedback.className = `alert alert-${type} mt-4 mb-0`;
-    elements.feedback.textContent = message;
-    elements.feedback.classList.remove("d-none");
+// 5. UTILIDADES
+function mostrarFormularioInstructor() {
+    ocultarSecciones();
+    document.getElementById("seccionFormularioInstructor").classList.remove("d-none");
 }
 
-function hideFeedback() {
-    elements.feedback.classList.add("d-none");
-    elements.feedback.textContent = "";
+function ocultarSecciones() {
+    document.getElementById("seccionTablaInstructores").classList.add("d-none");
+    document.getElementById("seccionFormularioInstructor").classList.add("d-none");
 }
 
-function hideSection(section) {
-    section.classList.add("d-none");
-}
-
-function showSection(section) {
-    section.classList.remove("d-none");
-}
-
-function limpiarVista() {
-    hideSection(elements.detalleCard);
-    hideSection(elements.tablaCard);
-}
-
-function valorSeguro(value) {
-    return value === null || value === undefined || value === "" ? "—" : value;
-}
-
-function nombreCompleto(instructor) {
-    return [instructor.nombre, instructor.apellidoPaterno, instructor.apellidoMaterno]
-        .filter(Boolean)
-        .join(" ");
-}
-
-async function obtenerCategoriasInstructor(idInstructor) {
-    try {
-        const response = await fetch(`${API_URL}/${idInstructor}/categorias`, { method: "GET" });
-        if (!response.ok) {
-            return [];
-        }
-        return await response.json();
-    } catch (error) {
-        console.error("No se pudieron obtener las categorías del instructor", error);
-        return [];
+// Detectar la tecla Enter en el campo de búsqueda
+document.getElementById("instructorInput").addEventListener("keypress", function(event) {
+    if (event.key === "Enter") {
+        event.preventDefault(); // Evita que la página se recargue
+        buscarInstructor();    // Llama a tu función de búsqueda
     }
-}
-
-async function enriquecerInstructor(instructor) {
-    const categorias = await obtenerCategoriasInstructor(instructor.idInstructor);
-    return {
-        ...instructor,
-        categorias
-    };
-}
-
-function renderDetalle(instructor) {
-    elements.detalleId.textContent = valorSeguro(instructor.idInstructor);
-    elements.detalleNombre.textContent = valorSeguro(nombreCompleto(instructor));
-    elements.detalleCorreo.textContent = valorSeguro(instructor.correo);
-    elements.detalleTelefono.textContent = valorSeguro(instructor.telefono);
-    elements.detalleEspecialidad.textContent = valorSeguro(instructor.especialidad);
-    elements.detalleBio.textContent = valorSeguro(instructor.bio);
-
-    const categoriasTexto = instructor.categorias && instructor.categorias.length > 0
-        ? instructor.categorias.map(cat => cat.nombre ?? `Categoría ${cat.idCategoria}`).join(", ")
-        : "Sin categorías registradas";
-
-    elements.detalleCategorias.textContent = categoriasTexto;
-    elements.badgeActivo.textContent = instructor.activo ? "Activo" : "Inactivo";
-    elements.badgeActivo.className = instructor.activo ? "badge text-bg-success" : "badge text-bg-secondary";
-
-    showSection(elements.detalleCard);
-}
-
-function renderTabla(instructores) {
-    elements.tablaBody.innerHTML = "";
-
-    if (!instructores.length) {
-        elements.tablaBody.innerHTML = `
-            <tr>
-                <td colspan="7" class="text-center py-4">No se encontraron instructores.</td>
-            </tr>
-        `;
-    } else {
-        instructores.forEach(instructor => {
-            const categoriasTexto = instructor.categorias && instructor.categorias.length > 0
-                ? instructor.categorias.map(cat => cat.nombre ?? `Categoría ${cat.idCategoria}`).join(", ")
-                : "Sin categorías";
-
-            const row = document.createElement("tr");
-            row.innerHTML = `
-                <td>${valorSeguro(instructor.idInstructor)}</td>
-                <td>${valorSeguro(nombreCompleto(instructor))}</td>
-                <td>${valorSeguro(instructor.correo)}</td>
-                <td>${valorSeguro(instructor.telefono)}</td>
-                <td>${valorSeguro(instructor.especialidad)}</td>
-                <td>${instructor.activo ? "Sí" : "No"}</td>
-                <td>${categoriasTexto}</td>
-            `;
-            elements.tablaBody.appendChild(row);
-        });
-    }
-
-    elements.totalResultados.textContent = `${instructores.length} resultado(s)`;
-    showSection(elements.tablaCard);
-}
-
-async function obtenerTodosLosInstructores() {
-    const response = await fetch(API_URL, { method: "GET" });
-    if (!response.ok) {
-        throw new Error("No se pudo obtener la lista de instructores.");
-    }
-    return await response.json();
-}
-
-async function buscarPorId(id) {
-    const response = await fetch(`${API_URL}/${id}`, { method: "GET" });
-    if (!response.ok) {
-        if (response.status === 404) {
-            throw new Error(`No se encontró un instructor con el ID ${id}.`);
-        }
-        throw new Error("No se pudo obtener el instructor solicitado.");
-    }
-    return await response.json();
-}
-
-async function mostrarTodos() {
-    hideFeedback();
-    hideSection(elements.formCard);
-    limpiarVista();
-
-    try {
-        const instructoresBase = await obtenerTodosLosInstructores();
-        const instructores = await Promise.all(instructoresBase.map(enriquecerInstructor));
-        renderTabla(instructores);
-        showFeedback("Lista completa de instructores cargada correctamente.", "success");
-    } catch (error) {
-        console.error(error);
-        showFeedback(error.message, "danger");
-    }
-}
-
-async function ejecutarBusqueda(event) {
-    event.preventDefault();
-    hideFeedback();
-    hideSection(elements.formCard);
-    limpiarVista();
-
-    const criterio = elements.searchInput.value.trim();
-
-    if (!criterio) {
-        showFeedback("Escribe un ID o un nombre para realizar la búsqueda.", "warning");
-        return;
-    }
-
-    try {
-        if (/^\d+$/.test(criterio)) {
-            const instructorBase = await buscarPorId(criterio);
-            const instructor = await enriquecerInstructor(instructorBase);
-            renderDetalle(instructor);
-            showFeedback(`Instructor con ID ${criterio} encontrado correctamente.`, "success");
-            return;
-        }
-
-        const instructoresBase = await obtenerTodosLosInstructores();
-        const filtradosBase = instructoresBase.filter(instructor => {
-            const texto = nombreCompleto(instructor).toLowerCase();
-            return texto.includes(criterio.toLowerCase());
-        });
-
-        if (!filtradosBase.length) {
-            throw new Error(`No se encontraron instructores con el nombre "${criterio}".`);
-        }
-
-        const instructores = await Promise.all(filtradosBase.map(enriquecerInstructor));
-
-        if (instructores.length === 1) {
-            renderDetalle(instructores[0]);
-        }
-
-        renderTabla(instructores);
-        showFeedback(`Se encontraron ${instructores.length} instructor(es) para "${criterio}".`, "success");
-    } catch (error) {
-        console.error(error);
-        showFeedback(error.message, "danger");
-    }
-}
-
-function parsearCategorias(input) {
-    const texto = input.trim();
-    if (!texto) {
-        return [];
-    }
-
-    return texto
-        .split(",")
-        .map(valor => valor.trim())
-        .filter(valor => valor !== "" && !Number.isNaN(Number(valor)))
-        .map(valor => ({ idCategoria: Number(valor) }));
-}
-
-async function guardarInstructor(event) {
-    event.preventDefault();
-    hideFeedback();
-
-    const payload = {
-        nombre: document.getElementById("nombre").value.trim(),
-        apellidoPaterno: document.getElementById("apellidoPaterno").value.trim() || null,
-        apellidoMaterno: document.getElementById("apellidoMaterno").value.trim() || null,
-        correo: document.getElementById("correo").value.trim() || null,
-        telefono: document.getElementById("telefono").value.trim() || null,
-        especialidad: document.getElementById("especialidad").value.trim() || null,
-        bio: document.getElementById("bio").value.trim() || null,
-        activo: document.getElementById("activo").value === "true",
-        categorias: parsearCategorias(document.getElementById("categorias").value)
-    };
-
-    if (!payload.nombre) {
-        showFeedback("El nombre del instructor es obligatorio.", "warning");
-        return;
-    }
-
-    try {
-        const response = await fetch(API_URL, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(payload)
-        });
-
-        if (!response.ok) {
-            const message = await response.text();
-            throw new Error(message || "No se pudo guardar el instructor.");
-        }
-
-        const instructorGuardado = await response.json();
-        const instructorCompleto = await enriquecerInstructor(instructorGuardado);
-
-        elements.formInstructor.reset();
-        document.getElementById("activo").value = "true";
-        hideSection(elements.formCard);
-        limpiarVista();
-        renderDetalle(instructorCompleto);
-        showFeedback(`Instructor registrado correctamente con ID ${instructorGuardado.idInstructor}.`, "success");
-    } catch (error) {
-        console.error(error);
-        showFeedback(error.message, "danger");
-    }
-}
-
-function mostrarFormulario() {
-    hideFeedback();
-    limpiarVista();
-    showSection(elements.formCard);
-}
-
-function ocultarFormulario() {
-    hideSection(elements.formCard);
-}
-
-elements.searchForm.addEventListener("submit", ejecutarBusqueda);
-elements.btnTodos.addEventListener("click", mostrarTodos);
-elements.btnMostrarFormulario.addEventListener("click", mostrarFormulario);
-elements.btnCancelarFormulario.addEventListener("click", ocultarFormulario);
-elements.formInstructor.addEventListener("submit", guardarInstructor);
+});
