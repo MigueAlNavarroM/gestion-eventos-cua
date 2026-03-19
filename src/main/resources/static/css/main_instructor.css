@@ -1,0 +1,31 @@
+body {
+    background: #f5f7fa;
+}
+
+.card {
+    border-radius: 1rem;
+}
+
+.table th,
+.table td {
+    vertical-align: middle;
+}
+
+#feedback {
+    white-space: pre-line;
+}
+
+.badge {
+    font-size: 0.9rem;
+}
+
+.form-control:focus,
+.form-select:focus {
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.15);
+}
+
+@media (max-width: 576px) {
+    .card-body {
+        padding: 1.25rem !important;
+    }
+}
