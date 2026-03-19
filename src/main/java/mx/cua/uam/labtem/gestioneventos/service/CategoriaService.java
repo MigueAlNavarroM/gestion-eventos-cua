@@ -1,54 +1,53 @@
 package mx.cua.uam.labtem.gestioneventos.service;
 
+import mx.cua.uam.labtem.gestioneventos.dto.CategoriaDTO;
 import mx.cua.uam.labtem.gestioneventos.entity.CategoriaEntity;
 import mx.cua.uam.labtem.gestioneventos.repository.CategoriaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class CategoriaService {
-
     @Autowired
-    private CategoriaRepository categoriaRepository;
+    private CategoriaRepository repo;
 
-    public CategoriaEntity crear(CategoriaEntity categoria) {
-        return categoriaRepository.save(categoria);
+    // Método privado para convertir la entidad interna a un DTO de salida
+    private CategoriaDTO convertirADTO(CategoriaEntity c) {
+        return new CategoriaDTO(c.getIdCategoria(), c.getNombre(), c.getDescripcion(), c.getGeneraCertificado());
     }
 
-    public List<CategoriaEntity> listar() {
-        return categoriaRepository.findAll();
+    public List<CategoriaDTO> listar() {
+        return repo.findAll().stream().map(this::convertirADTO).collect(Collectors.toList());
     }
 
-    public CategoriaEntity obtener(Integer id) {
-        return categoriaRepository.findById(id).orElse(null);
+    public CategoriaDTO obtener(Integer id) {
+        return repo.findById(id).map(this::convertirADTO).orElse(null);
     }
 
-    public CategoriaEntity actualizar(Integer id, CategoriaEntity categoria) {
-        categoria.setIdCategoria(id);
-        return categoriaRepository.save(categoria);
+    public CategoriaDTO crear(CategoriaEntity c) { return convertirADTO(repo.save(c)); }
+
+    // PUT: Reemplaza todos los valores de la categoría
+    public CategoriaDTO actualizar(Integer id, CategoriaEntity c) {
+        CategoriaEntity ex = repo.findById(id).orElse(null);
+        if (ex == null) return null;
+        ex.setNombre(c.getNombre());
+        ex.setDescripcion(c.getDescripcion());
+        ex.setGeneraCertificado(c.getGeneraCertificado());
+        return convertirADTO(repo.save(ex));
     }
 
-    public CategoriaEntity actualizarParcial(Integer id, Map<String, Object> cambios) {
-        CategoriaEntity categoria = obtener(id);
-        if (categoria == null) return null;
-
-        if (cambios.containsKey("nombre")) {
-            categoria.setNombre((String) cambios.get("nombre"));
-        }
-        if (cambios.containsKey("descripcion")) {
-            categoria.setDescripcion((String) cambios.get("descripcion"));
-        }
-        if (cambios.containsKey("generaCertificado")) {
-            categoria.setGeneraCertificado((Boolean) cambios.get("generaCertificado"));
-        }
-
-        return categoriaRepository.save(categoria);
+    // PATCH: Actualiza solo campos específicos dinámicamente
+    public CategoriaDTO actualizarParcial(Integer id, Map<String, Object> cambios) {
+        CategoriaEntity ex = repo.findById(id).orElse(null);
+        if (ex == null) return null;
+        if (cambios.containsKey("nombre")) ex.setNombre((String) cambios.get("nombre"));
+        if (cambios.containsKey("descripcion")) ex.setDescripcion((String) cambios.get("descripcion"));
+        if (cambios.containsKey("generaCertificado")) ex.setGeneraCertificado((Boolean) cambios.get("generaCertificado"));
+        return convertirADTO(repo.save(ex));
     }
 
-    public void eliminar(Integer id) {
-        categoriaRepository.deleteById(id);
-    }
+    public void eliminar(Integer id) { repo.deleteById(id); }
 }

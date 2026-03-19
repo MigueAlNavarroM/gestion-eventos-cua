@@ -1,57 +1,56 @@
 package mx.cua.uam.labtem.gestioneventos.controller;
 
-import mx.cua.uam.labtem.gestioneventos.entity.Instructor;
+import mx.cua.uam.labtem.gestioneventos.dto.InstructorDTO;
+import mx.cua.uam.labtem.gestioneventos.dto.EventoDTO;
+import mx.cua.uam.labtem.gestioneventos.entity.InstructorEntity;
 import mx.cua.uam.labtem.gestioneventos.service.InstructorService;
-import org.springframework.http.ResponseEntity;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/instructores")
 public class InstructorController {
 
-    private final InstructorService instructorService;
-
-    public InstructorController(InstructorService instructorService) {
-        this.instructorService = instructorService;
-    }
+    @Autowired
+    private InstructorService service;
 
     @GetMapping
-    public List<Instructor> obtenerTodos() {
-        return instructorService.obtenerTodos();
+    public List<InstructorDTO> listar() {
+        return service.listar();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Instructor> obtenerPorId(@PathVariable Integer id) {
-        return instructorService.obtenerPorId(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public InstructorDTO obtener(@PathVariable Integer id) {
+        return service.obtener(id);
+    }
+
+    // URL: http://localhost:8080/instructores/{id}/eventos
+    @GetMapping("/{id}/eventos")
+    public List<EventoDTO> obtenerEventos(@PathVariable Integer id) {
+        List<EventoDTO> eventos = service.listarEventosPorInstructor(id);
+        return eventos != null ? eventos : java.util.Collections.emptyList();
     }
 
     @PostMapping
-    public ResponseEntity<Instructor> crear(@RequestBody Instructor instructor) {
-        Instructor nuevoInstructor = instructorService.guardar(instructor);
-        return ResponseEntity.ok(nuevoInstructor);
+    public InstructorDTO crear(@RequestBody InstructorEntity i) {
+        return service.crear(i);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Instructor> actualizar(@PathVariable Integer id, @RequestBody Instructor instructor) {
-        try {
-            Instructor instructorActualizado = instructorService.actualizar(id, instructor);
-            return ResponseEntity.ok(instructorActualizado);
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
+    public InstructorDTO actualizar(@PathVariable Integer id, @RequestBody InstructorEntity i) {
+        return service.actualizar(id, i);
+    }
+
+    @PatchMapping("/{id}")
+    public InstructorDTO actualizarParcial(@PathVariable Integer id, @RequestBody Map<String, Object> cambios) {
+        return service.actualizarParcial(id, cambios);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> eliminar(@PathVariable Integer id) {
-        try {
-            instructorService.eliminar(id);
-            return ResponseEntity.noContent().build();
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
+    public void eliminar(@PathVariable Integer id) {
+        service.eliminar(id);
     }
 }

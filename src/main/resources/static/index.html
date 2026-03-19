@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Gestión de Categorías - UAM</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-info shadow-sm mb-4">
+    <div class="container-fluid">
+        <a class="navbar-brand fw-bold" href="#">UAM - Gestión de Eventos Culturales</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link active fw-bold" href="index.html">Categorías</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-white" href="instructores.html">Instructores</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link disabled" href="#"></a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link disabled" href="#"></a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div id="name-or-number" class="container">
+    <div class="text-center card p-4 shadow-sm">
+        <form action="javascript:void(0);" onsubmit="baseURL()">
+            <label class="form-label fw-bold">Indica el ID de la Categoría</label>
+            <input id="categoriaInput" type="text" class="form-control text-center mb-3" placeholder="Ej. 1">
+            <button class="btn btn-warning w-100" onclick="baseURL()">Buscar Categoría</button>
+        </form>
+    </div>
+</div>
+
+<div id="table" class="container mt-5 card p-4 shadow" style="display: none;">
+    <div class="row">
+        <div class="col-12 text-center mb-4">
+            <img width="150px" src="assets/img/teminalNotFound.jpg" alt="Categoría" id="image" class="rounded shadow-sm">
+        </div>
+
+        <div class="col-6 text-end fw-bold"><p>ID Categoría:</p></div>
+        <div class="col-6 text-start"><p id="parameterValue0"></p></div>
+
+        <div class="col-6 text-end fw-bold"><p>Nombre:</p></div>
+        <div class="col-6 text-start"><p id="parameterValue1"></p></div>
+
+        <div class="col-6 text-end fw-bold"><p>Descripción:</p></div>
+        <div class="col-6 text-start"><p id="parameterValue2"></p></div>
+
+        <div class="col-6 text-end fw-bold"><p>¿Genera Certificado?:</p></div>
+        <div class="col-6 text-start"><p id="parameterValue3"></p></div>
+    </div>
+</div>
+
+<script src="js/main.js"></script>
+</body>
+</html>

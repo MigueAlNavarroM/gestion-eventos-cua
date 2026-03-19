@@ -1,53 +1,54 @@
 package mx.cua.uam.labtem.gestioneventos.controller;
 
+import mx.cua.uam.labtem.gestioneventos.dto.CategoriaDTO;
 import mx.cua.uam.labtem.gestioneventos.entity.CategoriaEntity;
 import mx.cua.uam.labtem.gestioneventos.service.CategoriaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/categoria")
+@RequestMapping("/categorias")
+@CrossOrigin(origins = "*") // Esto es lo único que agregamos para que tu JS funcione
 public class CategoriaController {
 
     @Autowired
-    private CategoriaService categoriaService;
+    private CategoriaService service;
 
-    // CREATE
-    @PostMapping
-    public CategoriaEntity crear(@RequestBody CategoriaEntity categoria) {
-        return categoriaService.crear(categoria);
-    }
-
-    // READ - listar todas
+    // 1. Listar todas
     @GetMapping
-    public List<CategoriaEntity> listar() {
-        return categoriaService.listar();
+    public List<CategoriaDTO> listar() {
+        return service.listar();
     }
 
-    // READ - obtener por id
+    // 2. Obtener por ID (El que usa tu buscador de Bootstrap)
     @GetMapping("/{id}")
-    public CategoriaEntity obtener(@PathVariable Integer id) {
-        return categoriaService.obtener(id);
+    public CategoriaDTO obtener(@PathVariable Integer id) {
+        return service.obtener(id);
     }
 
-    // UPDATE completo
+    // 3. Crear nueva categoría
+    @PostMapping
+    public CategoriaDTO crear(@RequestBody CategoriaEntity c) {
+        return service.crear(c);
+    }
+
+    // 4. Actualizar completa
     @PutMapping("/{id}")
-    public CategoriaEntity actualizar(@PathVariable Integer id, @RequestBody CategoriaEntity categoria) {
-        return categoriaService.actualizar(id, categoria);
+    public CategoriaDTO actualizar(@PathVariable Integer id, @RequestBody CategoriaEntity c) {
+        return service.actualizar(id, c);
     }
 
-    // UPDATE parcial (PATCH)
+    // 5. Actualizar parcial
     @PatchMapping("/{id}")
-    public CategoriaEntity actualizarParcial(@PathVariable Integer id, @RequestBody Map<String, Object> cambios) {
-        return categoriaService.actualizarParcial(id, cambios);
+    public CategoriaDTO actualizarParcial(@PathVariable Integer id, @RequestBody Map<String, Object> cambios) {
+        return service.actualizarParcial(id, cambios);
     }
 
-    // DELETE
+    // 6. Eliminar
     @DeleteMapping("/{id}")
     public void eliminar(@PathVariable Integer id) {
-        categoriaService.eliminar(id);
+        service.eliminar(id);
     }
 }
